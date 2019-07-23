@@ -1,0 +1,11 @@
+coverage
+node_modules
+.editorconfig
+.gitignore
+.git
+.npmignore
+.prettierrc
+jest.config.js
+tsconfig.json
+tslint.json
+yarn-error.log
