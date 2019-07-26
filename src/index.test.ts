@@ -3,7 +3,7 @@ import fastify, { FastifyInstance } from "fastify";
 import jwt from "jsonwebtoken";
 import jose from "node-jose";
 
-import fastifyAwsCognitoPlugin, { FastifyAwsCognitoPluginOptions } from "./.";
+import fastifyAwsCognitoPlugin, { FastifyAwsCognitoPluginOptions } from ".";
 
 describe("FastifyAwsCognitoPlugin", () => {
   let instance: FastifyInstance;
@@ -21,7 +21,7 @@ describe("FastifyAwsCognitoPlugin", () => {
     const options: FastifyAwsCognitoPluginOptions = 42;
 
     await expect(instance.register(fastifyAwsCognitoPlugin, options).ready()).rejects.toThrowError(
-      "options should be object",
+      "options should be object"
     );
   });
 
@@ -30,7 +30,7 @@ describe("FastifyAwsCognitoPlugin", () => {
     const options: FastifyAwsCognitoPluginOptions = { userPoolId: "us-east-1_foobar" };
 
     await expect(instance.register(fastifyAwsCognitoPlugin, options).ready()).rejects.toThrowError(
-      "options should have required property 'region'",
+      "options should have required property 'region'"
     );
   });
 
@@ -39,7 +39,7 @@ describe("FastifyAwsCognitoPlugin", () => {
     const options: FastifyAwsCognitoPluginOptions = { region: 12345, userPoolId: "us-east-1_foobar" };
 
     await expect(instance.register(fastifyAwsCognitoPlugin, options).ready()).rejects.toThrowError(
-      "options.region should be string",
+      "options.region should be string"
     );
   });
 
@@ -48,7 +48,7 @@ describe("FastifyAwsCognitoPlugin", () => {
     const options: FastifyAwsCognitoPluginOptions = { region: "us-east-1" };
 
     await expect(instance.register(fastifyAwsCognitoPlugin, options).ready()).rejects.toThrow(
-      "options should have required property 'userPoolId'",
+      "options should have required property 'userPoolId'"
     );
   });
 
@@ -57,7 +57,7 @@ describe("FastifyAwsCognitoPlugin", () => {
     const options: FastifyAwsCognitoPluginOptions = { region: "us-east-1", userPoolId: 12345 };
 
     await expect(instance.register(fastifyAwsCognitoPlugin, options).ready()).rejects.toThrow(
-      "options.userPoolId should be string",
+      "options.userPoolId should be string"
     );
   });
 
@@ -72,7 +72,7 @@ describe("FastifyAwsCognitoPlugin", () => {
     expect(response.data).toMatchObject({
       error: "Unauthorized",
       message: "Authorization header is missing",
-      statusCode: 401,
+      statusCode: 401
     });
   });
 
@@ -87,7 +87,7 @@ describe("FastifyAwsCognitoPlugin", () => {
     expect(response.data).toMatchObject({
       error: "Unauthorized",
       message: "Authorization header is malformed",
-      statusCode: 401,
+      statusCode: 401
     });
   });
 
@@ -103,7 +103,7 @@ describe("FastifyAwsCognitoPlugin", () => {
     expect(response.data).toMatchObject({
       error: "Unauthorized",
       message: "Unable to retrieve key id of token",
-      statusCode: 401,
+      statusCode: 401
     });
   });
 
@@ -119,7 +119,7 @@ describe("FastifyAwsCognitoPlugin", () => {
     const user = { email: "foo@bar.net", sub: "12345" };
     const signOptions: jwt.SignOptions = { keyid: "foobar" };
     const response = await getUriAndReturnError(uri, {
-      withAuthorizationHeader: `Bearer ${jwt.sign(user, "foobar", signOptions)}`,
+      withAuthorizationHeader: `Bearer ${jwt.sign(user, "foobar", signOptions)}`
     });
 
     expect(response).toBeDefined();
@@ -128,7 +128,7 @@ describe("FastifyAwsCognitoPlugin", () => {
     expect(response.data).toMatchObject({
       error: "Internal Server Error",
       message: "An unknown error occurred while retrieving known keys",
-      statusCode: 500,
+      statusCode: 500
     });
   });
 
@@ -145,8 +145,8 @@ describe("FastifyAwsCognitoPlugin", () => {
         statusText: "Not Found",
         config: {},
         data: null,
-        headers: {},
-      },
+        headers: {}
+      }
     };
     axiosInstance.get = jest.fn(axiosInstance.get.bind(axiosInstance)).mockRejectedValueOnce(mockResponse) as any;
 
@@ -156,7 +156,7 @@ describe("FastifyAwsCognitoPlugin", () => {
     const user = { email: "foo@bar.net", sub: "12345" };
     const signOptions: jwt.SignOptions = { keyid: "foobar" };
     const response = await getUriAndReturnError(uri, {
-      withAuthorizationHeader: `Bearer ${jwt.sign(user, "foobar", signOptions)}`,
+      withAuthorizationHeader: `Bearer ${jwt.sign(user, "foobar", signOptions)}`
     });
 
     expect(response).toBeDefined();
@@ -165,7 +165,7 @@ describe("FastifyAwsCognitoPlugin", () => {
     expect(response.data).toMatchObject({
       error: "Internal Server Error",
       message: "Unable to retrieve known keys for user pool id",
-      statusCode: 500,
+      statusCode: 500
     });
   });
 
@@ -176,7 +176,7 @@ describe("FastifyAwsCognitoPlugin", () => {
       statusText: "OK",
       status: 200,
       config: {},
-      headers: {},
+      headers: {}
     };
     axiosInstance.get = jest.fn(axiosInstance.get.bind(axiosInstance)).mockResolvedValueOnce(mockResponse) as any;
 
@@ -186,7 +186,7 @@ describe("FastifyAwsCognitoPlugin", () => {
     const user = { email: "foo@bar.net", sub: "12345" };
     const signOptions: jwt.SignOptions = { keyid: "foobar" };
     const response = await getUriAndReturnError(uri, {
-      withAuthorizationHeader: `Bearer ${jwt.sign(user, "foobar", signOptions)}`,
+      withAuthorizationHeader: `Bearer ${jwt.sign(user, "foobar", signOptions)}`
     });
 
     expect(response).toBeDefined();
@@ -194,7 +194,7 @@ describe("FastifyAwsCognitoPlugin", () => {
     expect(response.data).toMatchObject({
       error: "Unauthorized",
       message: "Token was signed with unknown key id",
-      statusCode: 401,
+      statusCode: 401
     });
   });
 
@@ -207,7 +207,7 @@ describe("FastifyAwsCognitoPlugin", () => {
       statusText: "OK",
       status: 200,
       config: {},
-      headers: {},
+      headers: {}
     };
     axiosInstance.get = jest.fn(axiosInstance.get.bind(axiosInstance)).mockResolvedValueOnce(mockResponse) as any;
 
@@ -218,7 +218,7 @@ describe("FastifyAwsCognitoPlugin", () => {
     const signOptions: jwt.SignOptions = { keyid: "foobar" };
     const token = jwt.sign(user, "not-the-key-in-keystore", signOptions);
     const response = await getUriAndReturnError(uri, {
-      withAuthorizationHeader: `Bearer ${token}`,
+      withAuthorizationHeader: `Bearer ${token}`
     });
 
     expect(response).toBeDefined();
@@ -226,7 +226,7 @@ describe("FastifyAwsCognitoPlugin", () => {
     expect(response.data).toMatchObject({
       error: "Unauthorized",
       message: "Token verification failed",
-      statusCode: 401,
+      statusCode: 401
     });
   });
 
@@ -239,13 +239,13 @@ describe("FastifyAwsCognitoPlugin", () => {
       statusText: "OK",
       status: 200,
       config: {},
-      headers: {},
+      headers: {}
     };
     axiosInstance.get = jest.fn(axiosInstance.get.bind(axiosInstance)).mockResolvedValueOnce(mockResponse) as any;
 
     await registerAwsCognitoPluginTo(instance, {
       overrides: { axiosInstance },
-      allowedAudiences: ["http://localhost:3000"],
+      allowedAudiences: ["http://localhost:3000"]
     });
 
     const uri = await instance.listen(0);
@@ -253,7 +253,7 @@ describe("FastifyAwsCognitoPlugin", () => {
     const signOptions: jwt.SignOptions = { keyid: "foobar", audience: "https://somewhere.net", algorithm: "RS256" };
     const token = jwt.sign(user, key.toPEM(true), signOptions);
     const response = await getUriAndReturnError(uri, {
-      withAuthorizationHeader: `Bearer ${token}`,
+      withAuthorizationHeader: `Bearer ${token}`
     });
 
     expect(response).toBeDefined();
@@ -261,7 +261,7 @@ describe("FastifyAwsCognitoPlugin", () => {
     expect(response.data).toMatchObject({
       error: "Unauthorized",
       message: "Token verification failed: audience is not allowed",
-      statusCode: 401,
+      statusCode: 401
     });
   });
 
@@ -274,12 +274,12 @@ describe("FastifyAwsCognitoPlugin", () => {
       statusText: "OK",
       status: 200,
       config: {},
-      headers: {},
+      headers: {}
     };
     axiosInstance.get = jest.fn(axiosInstance.get.bind(axiosInstance)).mockResolvedValueOnce(mockResponse) as any;
 
     await registerAwsCognitoPluginTo(instance, {
-      overrides: { axiosInstance },
+      overrides: { axiosInstance }
     });
 
     const uri = await instance.listen(0);
@@ -288,11 +288,11 @@ describe("FastifyAwsCognitoPlugin", () => {
       keyid: "foobar",
       algorithm: "RS256",
       expiresIn: "1ms",
-      issuer: "https://cognito-idp.us-east-1.amazonaws.com/us-east-1_foobar",
+      issuer: "https://cognito-idp.us-east-1.amazonaws.com/us-east-1_foobar"
     };
     const token = jwt.sign(user, key.toPEM(true), signOptions);
     const response = await getUriAndReturnError(uri, {
-      withAuthorizationHeader: `Bearer ${token}`,
+      withAuthorizationHeader: `Bearer ${token}`
     });
 
     expect(response).toBeDefined();
@@ -300,7 +300,7 @@ describe("FastifyAwsCognitoPlugin", () => {
     expect(response.data).toMatchObject({
       error: "Unauthorized",
       message: "Token verification failed: token expired",
-      statusCode: 401,
+      statusCode: 401
     });
   });
 
@@ -313,12 +313,12 @@ describe("FastifyAwsCognitoPlugin", () => {
       statusText: "OK",
       status: 200,
       config: {},
-      headers: {},
+      headers: {}
     };
     axiosInstance.get = jest.fn(axiosInstance.get.bind(axiosInstance)).mockResolvedValueOnce(mockResponse) as any;
 
     await registerAwsCognitoPluginTo(instance, {
-      overrides: { axiosInstance },
+      overrides: { axiosInstance }
     });
 
     let request: fastify.FastifyRequest;
@@ -337,12 +337,12 @@ describe("FastifyAwsCognitoPlugin", () => {
       keyid: "foobar",
       algorithm: "RS256",
       expiresIn: "1h",
-      issuer: "https://cognito-idp.us-east-1.amazonaws.com/us-east-1_foobar",
+      issuer: "https://cognito-idp.us-east-1.amazonaws.com/us-east-1_foobar"
     };
     const token = jwt.sign(user, key.toPEM(true), signOptions);
 
     await getUriAndReturnError(`${uri}/decorated`, {
-      withAuthorizationHeader: `Bearer ${token}`,
+      withAuthorizationHeader: `Bearer ${token}`
     });
 
     // @ts-ignore
@@ -354,7 +354,7 @@ describe("FastifyAwsCognitoPlugin", () => {
 
 async function registerAwsCognitoPluginTo(
   instance: fastify.FastifyInstance,
-  withOptions: Partial<FastifyAwsCognitoPluginOptions> = {},
+  withOptions: Partial<FastifyAwsCognitoPluginOptions> = {}
 ) {
   await instance
     .register(fastifyAwsCognitoPlugin, { region: "us-east-1", userPoolId: "us-east-1_foobar", ...withOptions })
@@ -362,16 +362,16 @@ async function registerAwsCognitoPluginTo(
       instance.get(
         "/",
         {
-          preValidation: instance.cognito.verify,
+          preValidation: instance.cognito.verify
         },
-        async () => "ok",
+        async () => "ok"
       );
     });
 }
 
 async function getUriAndReturnError(
   uri: string,
-  options: { withAuthorizationHeader?: string } = {},
+  options: { withAuthorizationHeader?: string } = {}
 ): Promise<AxiosResponse> {
   const headers = options.withAuthorizationHeader ? { authorization: options.withAuthorizationHeader } : {};
 

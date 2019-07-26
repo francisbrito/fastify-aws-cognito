@@ -10,45 +10,32 @@ import * as jwt from "jsonwebtoken";
 import memoize from "mem";
 import * as jose from "node-jose";
 
-export interface FastifyAwsCognitoPluginOptions {
-  region: string;
-  userPoolId: string;
-  allowedAudiences?: string[];
-  overrides?: {
-    axiosInstance?: AxiosInstance;
-  };
-}
-
-export interface FastifyAwsCognitoDecoration {
-  verify: fastify.RequestHandler;
-}
-
 const optionsSchema = {
   type: "object",
   required: ["region", "userPoolId"],
   properties: {
     region: {
-      type: "string",
+      type: "string"
     },
     userPoolId: {
-      type: "string",
+      type: "string"
     },
     allowedAudiences: {
       type: "array",
       items: {
         type: "string",
-        format: "uri",
-      },
-    },
-  },
+        format: "uri"
+      }
+    }
+  }
 };
 
-const fastifyAwsCognitoPlugin: fastify.Plugin<
+const fastifyAwsCognitoPluginImplementation: fastify.Plugin<
   http.Server,
   http.IncomingMessage,
   http.ServerResponse,
-  FastifyAwsCognitoPluginOptions
-> = async (instance: fastify.FastifyInstance, options: FastifyAwsCognitoPluginOptions) => {
+  fastifyAwsCognitoPlugin.FastifyAwsCognitoPluginOptions
+> = async (instance: fastify.FastifyInstance, options: fastifyAwsCognitoPlugin.FastifyAwsCognitoPluginOptions) => {
   await validateOptions(options);
 
   const issuer = `https://cognito-idp.${options.region}.amazonaws.com/${options.userPoolId}`;
@@ -57,10 +44,10 @@ const fastifyAwsCognitoPlugin: fastify.Plugin<
   const requestVerifier = cognitoVerifier({
     issuer,
     withAllowedAudiences: options.allowedAudiences,
-    withAxiosInstance: axiosInstance,
+    withAxiosInstance: axiosInstance
   });
-  const decoration: FastifyAwsCognitoDecoration = {
-    verify: requestVerifier,
+  const decoration: fastifyAwsCognitoPlugin.FastifyAwsCognitoDecoration = {
+    verify: requestVerifier
   };
 
   instance.decorate("cognito", decoration);
@@ -94,7 +81,7 @@ function cognitoVerifier(options: AwsCognitoVerifierOptions) {
     try {
       request.token = await verifyToken(token, pem, {
         ...extraVerificationOptions,
-        issuer: options.issuer,
+        issuer: options.issuer
       });
     } catch (cause) {
       request.log.error(cause);
@@ -112,7 +99,7 @@ function cognitoVerifier(options: AwsCognitoVerifierOptions) {
 
 async function createKeyStoreFromWellKnownKeysOf(
   issuer: string,
-  axiosInstance: AxiosInstance,
+  axiosInstance: AxiosInstance
 ): Promise<jose.JWK.KeyStore> {
   const wellKnownKeysUri = `${issuer}/.well-known/jwks.json`;
   const keys = await axiosInstance
@@ -121,7 +108,7 @@ async function createKeyStoreFromWellKnownKeysOf(
     .catch((error: AxiosError) => {
       if (!(error.response && error.response.status < 500)) {
         return Promise.reject(
-          new httpErrors.InternalServerError("An unknown error occurred while retrieving known keys"),
+          new httpErrors.InternalServerError("An unknown error occurred while retrieving known keys")
         );
       }
 
@@ -197,7 +184,7 @@ function decodeBase64(input: string): string {
 
 const validator = new Validator();
 
-async function validateOptions(options: FastifyAwsCognitoPluginOptions): Promise<void> {
+async function validateOptions(options: fastifyAwsCognitoPlugin.FastifyAwsCognitoPluginOptions): Promise<void> {
   const isInvalid = !(await validator.validate(optionsSchema, options));
 
   if (isInvalid) {
@@ -208,6 +195,23 @@ async function validateOptions(options: FastifyAwsCognitoPluginOptions): Promise
   }
 }
 
-export default plugin(fastifyAwsCognitoPlugin, {
-  name: "fastify-aws-cognito",
+namespace fastifyAwsCognitoPlugin {
+  export interface FastifyAwsCognitoPluginOptions {
+    region: string;
+    userPoolId: string;
+    allowedAudiences?: string[];
+    overrides?: {
+      axiosInstance?: AxiosInstance;
+    };
+  }
+
+  export interface FastifyAwsCognitoDecoration {
+    verify: fastify.RequestHandler;
+  }
+}
+
+const fastifyAwsCognitoPlugin = plugin(fastifyAwsCognitoPluginImplementation, {
+  name: "fastify-aws-cognito"
 });
+
+export = fastifyAwsCognitoPlugin;
