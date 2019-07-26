@@ -1,10 +1,9 @@
 {
-    "defaultSeverity": "error",
-    "extends": [
-        "tslint:latest",
-        "tslint-plugin-prettier"
-    ],
-    "jsRules": {},
-    "rules": {},
-    "rulesDirectory": []
+  "defaultSeverity": "error",
+  "extends": ["tslint:latest", "tslint-plugin-prettier"],
+  "jsRules": {},
+  "rules": {
+    "trailing-comma": false
+  },
+  "rulesDirectory": []
 }
