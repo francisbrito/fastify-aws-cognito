@@ -60,5 +60,12 @@
       "prettier-tslint fix",
       "git add"
     ]
-  }
+  },
+  "repository": "git@github.com:francisbrito/fastify-aws-cognito.git",
+  "keywords": [
+    "fastify",
+    "aws",
+    "cognito",
+    "jwt"
+  ]
 }
