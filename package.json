@@ -11,9 +11,7 @@
     "@types/jsonwebtoken": "^8.3.2",
     "@types/node": "^12.6.8",
     "@types/node-jose": "^1.1.0",
-    "commitizen": "^4.0.3",
     "coveralls": "^3.0.5",
-    "cz-conventional-changelog": "3.0.2",
     "husky": "^3.0.1",
     "jest": "^24.8.0",
     "jest-axios-mock": "^1.0.0",
@@ -43,16 +41,10 @@
     "prebuild": "rimraf dist/",
     "prepublishOnly": "yarn build"
   },
-  "config": {
-    "commitizen": {
-      "path": "./node_modules/cz-conventional-changelog"
-    }
-  },
   "husky": {
     "hooks": {
       "pre-commit": "lint-staged",
-      "pre-push": "yarn test",
-      "prepare-commit-msg": "exec < /dev/tty && git cz --hook"
+      "pre-push": "yarn test"
     }
   },
   "lint-staged": {
