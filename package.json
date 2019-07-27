@@ -36,7 +36,8 @@
   },
   "scripts": {
     "test": "jest",
-    "test:ci": "jest --coverage --coverageReporters=text-lcov | coveralls",
+    "test:ci": "jest --coverage",
+    "posttest:ci": "cat coverage/lcov.info | coveralls",
     "build": "tsc",
     "prebuild": "rimraf dist/",
     "prepublishOnly": "yarn build"
