@@ -5,6 +5,8 @@ import jose from "node-jose";
 
 import fastifyAwsCognitoPlugin, { FastifyAwsCognitoPluginOptions } from ".";
 
+jest.setTimeout(10 * 1000);
+
 describe("FastifyAwsCognitoPlugin", () => {
   let instance: FastifyInstance;
 
