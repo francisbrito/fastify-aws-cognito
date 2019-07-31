@@ -54,7 +54,10 @@
       "git add"
     ]
   },
-  "repository": "git@github.com:francisbrito/fastify-aws-cognito.git",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/francisbrito/fastify-aws-cognito.git"
+  },
   "keywords": [
     "fastify",
     "aws",
