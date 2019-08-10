@@ -352,6 +352,54 @@ describe("FastifyAwsCognitoPlugin", () => {
     // @ts-ignore
     expect(request.token).toBeDefined();
   });
+
+  it("throws if token is blacklisted", async () => {
+    const axiosInstance = axios.create();
+    const keystore = jose.JWK.createKeyStore();
+    const key = await keystore.generate("RSA", 2048, { kid: "foobar", alg: "RS256" });
+    const mockResponse: AxiosResponse = {
+      data: { keys: [key.toJSON()] },
+      statusText: "OK",
+      status: 200,
+      config: {},
+      headers: {}
+    };
+    axiosInstance.get = jest.fn(axiosInstance.get.bind(axiosInstance)).mockResolvedValueOnce(mockResponse) as any;
+
+    const verifyJtiMock = jest.fn().mockResolvedValue(false);
+    await registerAwsCognitoPluginTo(instance, {
+      overrides: { axiosInstance },
+      verifyJtiWith: verifyJtiMock
+    });
+
+    instance.after(() => {
+      instance.get("/decorated", { preValidation: instance.cognito.verify }, async (r) => {
+        return { it: "works" };
+      });
+    });
+
+    const uri = await instance.listen(0);
+    const user = { email: "foo@bar.net", sub: "12345" };
+    const signOptions: jwt.SignOptions = {
+      keyid: "foobar",
+      algorithm: "RS256",
+      expiresIn: "1h",
+      issuer: "https://cognito-idp.us-east-1.amazonaws.com/us-east-1_foobar"
+    };
+    const token = jwt.sign(user, key.toPEM(true), signOptions);
+
+    const response = await getUriAndReturnError(`${uri}/decorated`, {
+      withAuthorizationHeader: `Bearer ${token}`
+    });
+
+    expect(response).toBeDefined();
+    expect(response.status).toBe(401);
+    expect(response.data).toMatchObject({
+      error: "Unauthorized",
+      message: "Token verification failed: jti is blacklisted",
+      statusCode: 401
+    });
+  });
 });
 
 async function registerAwsCognitoPluginTo(

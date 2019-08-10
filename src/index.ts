@@ -41,10 +41,12 @@ const fastifyAwsCognitoPluginImplementation: fastify.Plugin<
   const issuer = `https://cognito-idp.${options.region}.amazonaws.com/${options.userPoolId}`;
   const axiosInstance =
     options.overrides && options.overrides.axiosInstance ? options.overrides.axiosInstance : axios.create();
+  const checkJti = options.verifyJtiWith || (async () => true);
   const requestVerifier = cognitoVerifier({
     issuer,
     withAllowedAudiences: options.allowedAudiences,
-    withAxiosInstance: axiosInstance
+    withAxiosInstance: axiosInstance,
+    withJtiCheck: checkJti
   });
   const decoration: fastifyAwsCognitoPlugin.FastifyAwsCognitoDecoration = {
     verify: requestVerifier
@@ -61,10 +63,11 @@ interface AwsCognitoVerifierOptions {
   issuer: string;
   withAllowedAudiences?: string[];
   withAxiosInstance: AxiosInstance;
+  withJtiCheck: (jti: string) => Promise<boolean>;
 }
 
 function cognitoVerifier(options: AwsCognitoVerifierOptions) {
-  const verifyToken = util.promisify<string, string, jwt.VerifyOptions>(jwt.verify);
+  const verifyToken = util.promisify<string, string, jwt.VerifyOptions, string | object>(jwt.verify);
   const createKeyStoreFromWellKnownKeysOfOptimally = memoize(createKeyStoreFromWellKnownKeysOf, { maxAge: 60000 });
 
   return async function verifyWithCognito(request: fastify.FastifyRequest) {
@@ -79,10 +82,17 @@ function cognitoVerifier(options: AwsCognitoVerifierOptions) {
       : {};
 
     try {
-      request.token = await verifyToken(token, pem, {
+      const parsedToken = (await verifyToken(token, pem, {
         ...extraVerificationOptions,
         issuer: options.issuer
-      });
+      })) as { [k: string]: any };
+      const isJtiInvalid = !(await options.withJtiCheck(parsedToken.jti));
+
+      if (isJtiInvalid) {
+        return Promise.reject(new httpErrors.Unauthorized("Token verification failed: jti is blacklisted"));
+      }
+
+      request.token = parsedToken;
     } catch (cause) {
       request.log.error(cause);
 
@@ -200,6 +210,7 @@ namespace fastifyAwsCognitoPlugin {
     region: string;
     userPoolId: string;
     allowedAudiences?: string[];
+    verifyJtiWith?: (jti: string) => Promise<boolean>;
     overrides?: {
       axiosInstance?: AxiosInstance;
     };
