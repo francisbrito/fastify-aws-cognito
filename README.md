@@ -63,6 +63,12 @@ _Optional_.
 
 A list of [JWT Audiences](https://tools.ietf.org/html/rfc7519#section-4.1.3) to validate the token. Useful if you'd like to restrict which [app clients](https://docs.aws.amazon.com/cognito/latest/developerguide/user-pool-settings-client-apps.html) can access your server.
 
+##### `verifyJtiWith`
+Type: `function`
+_Optional_.
+
+A function with the signature `(jti: string) => Promise<boolean>` to be used to check if a given JWT id is valid or not. If not provided, all `jti` claims will be assumed as valid.
+
 ### `instance.cognito.verify(request)`
 A `fastify` handler that will reject any request with an invalid or missing JWT.
 
